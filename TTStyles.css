@@ -77,3 +77,20 @@ section{
 	font-size: 24px;
 	width: 100px;
 }
+
+#result{
+	margin: 20px 0;
+}
+
+.correct, .incorrect{
+	font-size: 24px;
+	font-family: monospace;
+}
+
+.correct{
+	color: green;
+}
+
+.incorrect{
+	color: red;
+}

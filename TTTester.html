@@ -9,10 +9,13 @@
 <body>
 <h1>Experiment</h1>
 <section id="setUpArea">
-	<div><label>Number of questions: </label><input id="numQuestions" min="1" value="10" type="number"></div>
+	<div>
+		<label for="numQuestions">Number of questions: </label><input id="numQuestions" min="1" value="10" type="number">
+		<label for="repeatIncorrect">Repeat Incorrect: </label><input id="repeatIncorrect" type="checkbox" checked="checked">
+	</div>
 	<div class="btnArea" id="timesHolder"></div>
 	<div class="btnArea" id="operatorsHolder">
-		<div id="mul" class="timeBtn">*</div>
+		<div id="mul" class="timeBtn">x</div>
 		<div id="div" class="timeBtn">/</div>
 		<div id="add" class="timeBtn">+</div>
 		<div id="sub" class="timeBtn">-</div>

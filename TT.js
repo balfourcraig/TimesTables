@@ -44,50 +44,98 @@ function setUpOperator(name, symbol){
 	});
 }
 
-function gradeAnswer(questionNumber, question){
+function gradeAnswer(questionNumber, question, next){
 	const answer = get('answer');
-	
+	answer.innerHTML = '';
 	if(answer.value){
 		const userAnswer = parseInt(answer.value);
 		const resultArea = get('result')
 		if(userAnswer === question.answer){
-			resultArea.innerText = 'Correct!';
+			correctAnswer();
 		}
 		else{
-			incorrect.push(question);
-			resultArea.innerText = 'Incorrect. The answer was ' + question.answer;
+			incorrectAnswer(question, userAnswer);
 		}
-		nextAction = () => buildQuestion(questionNumber -1);
+		nextAction = next;
 	}
 	else{
 		alert('You must answer the question');
 	}
 }
 
-function buildQuestion(questionNumber){
-	if(questionNumber > 0){
-		get('remaining').innerText = questionNumber;
-		const lhs = randomElement(selectedTimes);
-		const rhs = randomElement(selectedTimes);
+function correctAnswer(){
+	const resultArea = get('result')
+	const cor = document.createElement('div');
+	cor.setAttribute('class','correct');
+	cor.innerHTML = 'Correct!'
+	resultArea.appendChild(cor);
+	const press = document.createElement('p');
+	press.innerText = 'Press enter to continue';
+	resultArea.appendChild(press);
+}
 
-		const symbol = randomElement(selectedOps);
+function incorrectAnswer(question, userAnswer){
+	const resultArea = get('result');
+	const incor = document.createElement('div');
+	incor.setAttribute('class','incorrect');
+	incor.innerHTML = 'Incorrect. You said the answer is ' + userAnswer;
+	resultArea.appendChild(incor);
+	resultArea.appendChild(document.createElement('br'));
+	const cor = document.createElement('div');
+	cor.setAttribute('class','correct');
+	cor.innerHTML = question.lhs + ' ' + question.symbol + ' ' + question.rhs + ' = ' + question.answer;
+	resultArea.appendChild(cor);
+	const press = document.createElement('p');
+	press.innerText = 'Press enter to continue';
+	resultArea.appendChild(press);
+}
+
+function buildQuestion(questionNumber, useIncorrect){
+	if(questionNumber >= 0){
+		get('remaining').innerText = questionNumber + 1;
 		
-		const q = buildAnswer({lhs: lhs, rhs: rhs, symbol: symbol});
+		let q;
+		if(useIncorrect){
+			q = incorrect[questionNumber];
+			removeFromArray(incorrect, q);
+		}
+		else{
+			const lhs = randomElement(selectedTimes);
+			const rhs = rand(0, 13);
+			const symbol = randomElement(selectedOps);
+			q = buildAnswer({
+				lhs: lhs,
+				rhs: rhs,
+				symbol: symbol
+				}
+			);
+		}
+
 		get('question').innerText = q.lhs + ' ' + q.symbol + ' ' + q.rhs + ' = ';
 		get('answer').value = '';
 		get('result').innerHTML = '';
-		nextAction = () => {gradeAnswer(questionNumber, q);};
+		nextAction = () => {
+			gradeAnswer(questionNumber, q, () => {
+				buildQuestion(questionNumber -1, useIncorrect);
+			});
+		};
 	}
-	else
+	else if(get('repeatIncorrect').checked && !useIncorrect){
+		summaryRepeat();
+	}
+	else{
 		summary();
+	}
 }
 
 function buildAnswer(question){
 	if(question.symbol === '/'){
 		question.answer = question.lhs;
+		if(question.rhs === 0)
+			question.rhs = 1;
 		question.lhs = question.rhs * question.lhs;
 	}
-	else if (question.symbol === '*'){
+	else if (question.symbol === 'x'){
 		question.answer = question.rhs * question.lhs;
 	}
 	else if (question.symbol === '+'){
@@ -102,6 +150,18 @@ function buildAnswer(question){
 		question.answer = question.lhs - question.rhs;
 	}
 	return question;
+}
+
+function summaryRepeat(){
+	if(incorrect.length === 0)
+		summary();
+	else{
+		const resultArea = get('result');
+		resultArea.innerText = 'You got ' + incorrect.length + ' incorrect. Press enter to retry these ones';
+		nextAction = () => {
+			buildQuestion(incorrect.length -1, true)
+		};
+	}
 }
 
 function summary(){
@@ -134,7 +194,7 @@ function setUpStart(){
 		if(!inTest){
 			inTest = true;
 			get('start').innerText = 'Testing...';
-			buildQuestion(parseInt(get('numQuestions').value));
+			buildQuestion(parseInt(get('numQuestions').value) -1, false);
 			get('answer').focus();
 		}
 	});
@@ -167,7 +227,7 @@ function setUpTimes(){
 		holder.appendChild(btn);
 	}
 	
-	setUpOperator('mul', '*');
+	setUpOperator('mul', 'x');
 	setUpOperator('div', '/');
 	setUpOperator('add', '+');
 	setUpOperator('sub', '-');
