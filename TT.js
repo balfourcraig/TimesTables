@@ -10,11 +10,16 @@ function randomElement(arr){
 	return arr[rand(0, arr.length)];
 }
 
-const selectedTimes = [];
-const selectedOps = [];
-let inTest = false;
-let nextAction = null;
-const incorrect = [];
+function shuffle(arr){
+	let n = arr.length;
+	while(n > 0){
+		const r = Math.floor(Math.random() * n);
+		const temp = arr[r];
+		arr[r] = arr[n-1];
+		arr[n-1] = temp;
+		n--;
+	}
+}
 
 function removeFromArray(arr, toRemove){
 	const index = arr.indexOf(toRemove);
@@ -23,184 +28,15 @@ function removeFromArray(arr, toRemove){
 	}
 }
 
-function setUpOperator(name, symbol){
-	const btn = get(name);
-	selectedOps.push(symbol);
-	btn.setAttribute('active', 'true');
-	btn.addEventListener('click', (e) =>{
-		if(!inTest){
-			if(btn.getAttribute('active') == 'true'){
-				btn.setAttribute('active', 'false');
-				removeFromArray(selectedOps, symbol);
-			}
-			else{
-				btn.setAttribute('active', 'true');
-				selectedOps.push(symbol);
-			}
-		}
-		else{
-			alert('Finish the current test first');
-		}
-	});
-}
 
-function gradeAnswer(questionNumber, question, next){
-	const answer = get('answer');
-	answer.innerHTML = '';
-	if(answer.value){
-		const userAnswer = parseInt(answer.value);
-		const resultArea = get('result')
-		if(userAnswer === question.answer){
-			correctAnswer();
-		}
-		else{
-			incorrectAnswer(question, userAnswer);
-		}
-		nextAction = next;
-	}
-	else{
-		alert('You must answer the question');
-	}
-}
-
-function correctAnswer(){
-	const resultArea = get('result')
-	const cor = document.createElement('div');
-	cor.setAttribute('class','correct');
-	cor.innerHTML = 'Correct!'
-	resultArea.appendChild(cor);
-	const press = document.createElement('p');
-	press.innerText = 'Press enter to continue';
-	resultArea.appendChild(press);
-}
-
-function incorrectAnswer(question, userAnswer){
-	const resultArea = get('result');
-	const incor = document.createElement('div');
-	incor.setAttribute('class','incorrect');
-	incor.innerHTML = 'Incorrect. You said the answer is ' + userAnswer;
-	resultArea.appendChild(incor);
-	resultArea.appendChild(document.createElement('br'));
-	const cor = document.createElement('div');
-	cor.setAttribute('class','correct');
-	cor.innerHTML = question.lhs + ' ' + question.symbol + ' ' + question.rhs + ' = ' + question.answer;
-	resultArea.appendChild(cor);
-	const press = document.createElement('p');
-	press.innerText = 'Press enter to continue';
-	resultArea.appendChild(press);
-}
-
-function buildQuestion(questionNumber, useIncorrect){
-	if(questionNumber >= 0){
-		get('remaining').innerText = questionNumber + 1;
-		
-		let q;
-		if(useIncorrect){
-			q = incorrect[questionNumber];
-			removeFromArray(incorrect, q);
-		}
-		else{
-			const lhs = randomElement(selectedTimes);
-			const rhs = rand(0, 13);
-			const symbol = randomElement(selectedOps);
-			q = buildAnswer({
-				lhs: lhs,
-				rhs: rhs,
-				symbol: symbol
-				}
-			);
-		}
-
-		get('question').innerText = q.lhs + ' ' + q.symbol + ' ' + q.rhs + ' = ';
-		get('answer').value = '';
-		get('result').innerHTML = '';
-		nextAction = () => {
-			gradeAnswer(questionNumber, q, () => {
-				buildQuestion(questionNumber -1, useIncorrect);
-			});
-		};
-	}
-	else if(get('repeatIncorrect').checked && !useIncorrect){
-		summaryRepeat();
-	}
-	else{
-		summary();
-	}
-}
-
-function buildAnswer(question){
-	if(question.symbol === '/'){
-		question.answer = question.lhs;
-		if(question.rhs === 0)
-			question.rhs = 1;
-		question.lhs = question.rhs * question.lhs;
-	}
-	else if (question.symbol === 'x'){
-		question.answer = question.rhs * question.lhs;
-	}
-	else if (question.symbol === '+'){
-		question.answer = question.rhs + question.lhs;
-	}
-	else if (question.symbol === '-'){
-		if(question.rhs > question.lhs){
-			const temp = question.lhs;
-			question.lhs = question.rhs;
-			question.rhs = temp;
-		}
-		question.answer = question.lhs - question.rhs;
-	}
-	return question;
-}
-
-function summaryRepeat(){
-	if(incorrect.length === 0)
-		summary();
-	else{
-		const resultArea = get('result');
-		resultArea.innerText = 'You got ' + incorrect.length + ' incorrect. Press enter to retry these ones';
-		nextAction = () => {
-			buildQuestion(incorrect.length -1, true)
-		};
-	}
-}
-
-function summary(){
-	get('remaining').innerText = '-';
-	nextAction = null;
-	inTest = false;
-	get('start').innerText = 'Start';
-	const resultArea = get('result');
-	resultArea.innerHTML = '';
-	get('question').innerHTML = '';
-	get('answer').value = '';
-	
-	if(incorrect.length === 0){
-		resultArea.innerText = 'Congratulations, you got them all right!';
-	}
-	else{
-		resultArea.innerText = 'You got the following wrong:';
-		const list = document.createElement('ul');
-		for(let i = 0; i < incorrect.length; i++){
-			const li = document.createElement('li');
-			li.innerText = incorrect[i].lhs + ' ' + incorrect[i].symbol + ' ' + incorrect[i].rhs + ' = ' + incorrect[i].answer;
-			list.appendChild(li);
-		}
-		resultArea.appendChild(list);
-	}
-}
-
-function setUpStart(){
-	start.addEventListener('click', (e) => {
-		if(!inTest){
-			inTest = true;
-			get('start').innerText = 'Testing...';
-			buildQuestion(parseInt(get('numQuestions').value) -1, false);
-			get('answer').focus();
-		}
-	});
-}
 
 function setUpTimes(){
+	const selectedTimes = [];
+	const selectedOps = [];
+	let inTest = false;
+	let nextAction = null;
+	const incorrect = [];
+	
 	const holder = get('timesHolder');
 	for(let i =0; i <= 12; i++){
 		const btn = document.createElement('div');
@@ -240,6 +76,192 @@ function setUpTimes(){
 			nextAction();
 		}
 	});
+	
+	function setUpOperator(name, symbol){
+		const btn = get(name);
+		selectedOps.push(symbol);
+		btn.setAttribute('active', 'true');
+		btn.addEventListener('click', (e) =>{
+			if(!inTest){
+				if(btn.getAttribute('active') == 'true'){
+					btn.setAttribute('active', 'false');
+					removeFromArray(selectedOps, symbol);
+				}
+				else{
+					btn.setAttribute('active', 'true');
+					selectedOps.push(symbol);
+				}
+			}
+			else{
+				alert('Finish the current test first');
+			}
+		});
+	}
+	
+	function gradeAnswer(questionNumber, question, next){
+		const answer = get('answer');
+		answer.innerHTML = '';
+		if(answer.value){
+			const userAnswer = parseInt(answer.value);
+			const resultArea = get('result')
+			if(userAnswer === question.answer){
+				correctAnswer();
+			}
+			else{
+				incorrectAnswer(question, userAnswer);
+			}
+			nextAction = next;
+		}
+		else{
+			alert('You must answer the question');
+		}
+	}
+
+	function correctAnswer(){
+		const resultArea = get('result')
+		const cor = document.createElement('div');
+		cor.setAttribute('class','correct');
+		cor.innerHTML = 'Correct!'
+		resultArea.appendChild(cor);
+		const press = document.createElement('p');
+		press.innerText = 'Press enter to continue';
+		resultArea.appendChild(press);
+	}
+
+	function incorrectAnswer(question, userAnswer){
+		const resultArea = get('result');
+		const incor = document.createElement('div');
+		incor.setAttribute('class','incorrect');
+		incor.innerHTML = 'Incorrect. You said the answer is ' + userAnswer;
+		resultArea.appendChild(incor);
+		resultArea.appendChild(document.createElement('br'));
+		const cor = document.createElement('div');
+		cor.setAttribute('class','correct');
+		cor.innerHTML = question.lhs + ' ' + question.symbol + ' ' + question.rhs + ' = ' + question.answer;
+		resultArea.appendChild(cor);
+		const press = document.createElement('p');
+		press.innerText = 'Press enter to continue';
+		resultArea.appendChild(press);
+		incorrect.push(question);
+	}
+
+	function buildQuestion(questionNumber, useIncorrect){
+		if(questionNumber >= 0){
+			get('remaining').innerText = questionNumber + 1;
+			
+			let q;
+			if(useIncorrect){
+				q = incorrect[questionNumber];
+				removeFromArray(incorrect, q);
+			}
+			else{
+				const lhs = randomElement(selectedTimes);
+				const rhs = rand(0, 13);
+				const symbol = randomElement(selectedOps);
+				q = buildAnswer({
+					lhs: lhs,
+					rhs: rhs,
+					symbol: symbol
+					}
+				);
+			}
+
+			get('question').innerText = q.lhs + ' ' + q.symbol + ' ' + q.rhs + ' = ';
+			get('answer').value = '';
+			get('result').innerHTML = '';
+			nextAction = () => {
+				gradeAnswer(questionNumber, q, () => {
+					buildQuestion(questionNumber -1, useIncorrect);
+				});
+			};
+		}
+		else if(get('repeatIncorrect').checked && !useIncorrect){
+			summaryRepeat();
+		}
+		else{
+			summary();
+		}
+	}
+
+	function buildAnswer(question){
+		if(question.symbol === '/'){
+			question.answer = question.lhs;
+			if(question.rhs === 0)
+				question.rhs = 1;
+			question.lhs = question.rhs * question.lhs;
+		}
+		else if (question.symbol === 'x'){
+			question.answer = question.rhs * question.lhs;
+		}
+		else if (question.symbol === '+'){
+			question.answer = question.rhs + question.lhs;
+		}
+		else if (question.symbol === '-'){
+			if(question.rhs > question.lhs){
+				const temp = question.lhs;
+				question.lhs = question.rhs;
+				question.rhs = temp;
+			}
+			question.answer = question.lhs - question.rhs;
+		}
+		return question;
+	}
+
+	function summaryRepeat(){
+		if(incorrect.length === 0)
+			summary();
+		else{
+			const resultArea = get('result');
+			resultArea.innerText = 'You got ' + incorrect.length + ' incorrect. Press enter to retry these ones';
+			shuffle(incorrect);
+			nextAction = () => {
+				buildQuestion(incorrect.length -1, true)
+			};
+		}
+	}
+
+	function summary(){
+		get('remaining').innerText = '-';
+		nextAction = null;
+		inTest = false;
+		get('start').innerText = 'Start';
+		const resultArea = get('result');
+		resultArea.innerHTML = '';
+		get('question').innerHTML = '';
+		get('answer').value = '';
+		
+		if(incorrect.length === 0){
+			resultArea.innerText = 'Congratulations, you got them all right!';
+		}
+		else{
+			resultArea.innerText = 'You got the following wrong:';
+			const list = document.createElement('ul');
+			for(let i = 0; i < incorrect.length; i++){
+				const li = document.createElement('li');
+				li.innerText = incorrect[i].lhs + ' ' + incorrect[i].symbol + ' ' + incorrect[i].rhs + ' = ' + incorrect[i].answer;
+				list.appendChild(li);
+			}
+			resultArea.appendChild(list);
+		}
+	}
+
+	function setUpStart(){
+		start.addEventListener('click', (e) => {
+			if(!inTest){
+				inTest = true;
+				get('start').innerText = 'Testing...';
+				buildQuestion(parseInt(get('numQuestions').value) -1, false);
+				get('answer').focus();
+			}
+		});
+	}
 }
 
+
+
+
+
+
+
 window.addEventListener('DOMContentLoaded', setUpTimes);
+

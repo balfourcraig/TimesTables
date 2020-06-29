@@ -6,10 +6,12 @@ body{
 	max-width: 960px;
 	margin: 10px auto;
 	padding: 10px;
+	background-color: #1c222b;
+	color: #ccc;
+	font-family: consolas, monospace;
 }
 
 section{
-	background-color: #eee;
 	padding: 15px;
 }
 
@@ -21,7 +23,6 @@ section{
 .timeBtn {
   display: flex;
   padding: 5px;
-  background-color: white;
   margin: 5px;
   justify-content: center;
   align-items: center;
@@ -32,6 +33,7 @@ section{
   border: 2px solid;
   font-size: 24px;
   font-weight: bold;
+  background: none;
 }
 
 .timeBtn[active="true"]{
@@ -40,7 +42,8 @@ section{
 
 .timeBtn[active="true"]:hover{
 	background-color: limegreen;
-	color: white;
+	color: #1c222b;
+	border-color: white;
 }
 
 .timeBtn[active="false"]{
@@ -63,7 +66,6 @@ section{
 
 #questionArea{
 	display: flex;
-	background-color: white;
 	padding: 25px;
 	justify-content: center;
 	align-items: center;
@@ -71,11 +73,13 @@ section{
 
 #question{
 	font-size: 24px;
+	margin-right: 1em;
 }
 
 #answer{
 	font-size: 24px;
 	width: 100px;
+	
 }
 
 #result{
@@ -84,7 +88,6 @@ section{
 
 .correct, .incorrect{
 	font-size: 24px;
-	font-family: monospace;
 }
 
 .correct{
@@ -93,4 +96,15 @@ section{
 
 .incorrect{
 	color: red;
+}
+
+input{
+	background: none;
+	border: none;
+	padding: 1em;
+	color: #ccc;
+}
+
+hr{
+	color: dodgerblue;
 }
