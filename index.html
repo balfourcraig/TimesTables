@@ -11,7 +11,10 @@
 <section id="setUpArea">
 	<div>
 		<label for="numQuestions">Number of questions: </label><input id="numQuestions" min="1" value="10" type="number">
+		<br>
 		<label for="repeatIncorrect">Repeat Incorrect: </label><input id="repeatIncorrect" type="checkbox" checked="checked">
+		<br>
+		<label for="timeInput">Show Timer: </label><input id="timeInput" type="checkbox" checked="checked">
 	</div>
 	<div class="btnArea" id="timesHolder"></div>
 	<div class="btnArea" id="operatorsHolder">
@@ -21,6 +24,9 @@
 		<div id="sub" class="timeBtn">-</div>
 	</div>
 	<button id="start" class="timeBtn">Start</button>
+	<div id="timeArea">
+		<label>Time: </label><span id="timeReadout"></span>
+	</div>
 </section>
 <hr>
 <section>

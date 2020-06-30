@@ -36,6 +36,14 @@ function setUpTimes(){
 	let inTest = false;
 	let nextAction = null;
 	const incorrect = [];
+	let timerFunc = null;
+	
+	let showTime = get('timeInput').checked;
+	get('timeArea').setAttribute('style', 'display:' + (showTime ? 'block' : 'none'));
+	get('timeInput').addEventListener('change', () => {
+		showTime = get('timeInput').checked;
+		get('timeArea').setAttribute('style', 'display:' + (showTime ? 'block' : 'none'));
+	});
 	
 	const holder = get('timesHolder');
 	for(let i =0; i <= 12; i++){
@@ -132,7 +140,7 @@ function setUpTimes(){
 		const resultArea = get('result');
 		const incor = document.createElement('div');
 		incor.setAttribute('class','incorrect');
-		incor.innerHTML = 'Incorrect. You said the answer is ' + userAnswer;
+		incor.innerHTML = 'Incorrect. You said ' + userAnswer + ', the answer was ' + question.answer;
 		resultArea.appendChild(incor);
 		resultArea.appendChild(document.createElement('br'));
 		const cor = document.createElement('div');
@@ -221,6 +229,7 @@ function setUpTimes(){
 	}
 
 	function summary(){
+		clearInterval(timerFunc);
 		get('remaining').innerText = '-';
 		nextAction = null;
 		inTest = false;
@@ -251,6 +260,15 @@ function setUpTimes(){
 				inTest = true;
 				get('start').innerText = 'Testing...';
 				buildQuestion(parseInt(get('numQuestions').value) -1, false);
+				
+				if(showTime){
+					let time = 0;
+					timerFunc = setInterval(() => {
+						time += 1;
+						get('timeReadout').innerText = time + 's';
+					}, 1000)
+				}
+				
 				get('answer').focus();
 			}
 		});
