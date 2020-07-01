@@ -28,7 +28,9 @@ function removeFromArray(arr, toRemove){
 	}
 }
 
+const defaultOpNames = ['div', 'mul'];
 
+const defaultTimes = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function setUpTimes(){
 	const selectedTimes = [];
@@ -48,11 +50,18 @@ function setUpTimes(){
 	const holder = get('timesHolder');
 	for(let i =0; i <= 12; i++){
 		const btn = document.createElement('div');
-		selectedTimes.push(i);
 		btn.setAttribute('class','timeBtn');
-		btn.setAttribute('active', 'true');
 		btn.innerText = i.toString();
-		btn.setAttribute('active', 'true');
+		
+		if(defaultTimes.indexOf(i) === -1){
+			btn.setAttribute('active', 'false');
+		}
+		else{
+			btn.setAttribute('active', 'true');
+			selectedTimes.push(i);
+		}
+		
+
 		btn.addEventListener('click', (e) =>{
 			if(!inTest){
 				if(btn.getAttribute('active') == 'true'){
@@ -71,8 +80,8 @@ function setUpTimes(){
 		holder.appendChild(btn);
 	}
 	
-	setUpOperator('mul', 'x');
-	setUpOperator('div', '/');
+	setUpOperator('mul', '&#215;');
+	setUpOperator('div', '&#247;');
 	setUpOperator('add', '+');
 	setUpOperator('sub', '-');
 	
@@ -86,18 +95,26 @@ function setUpTimes(){
 	});
 	
 	function setUpOperator(name, symbol){
+		const symObj = {symbol: symbol, name: name};
 		const btn = get(name);
-		selectedOps.push(symbol);
-		btn.setAttribute('active', 'true');
+		
+		if(defaultOpNames.indexOf(name) === -1){
+			btn.setAttribute('active', 'false');
+		}
+		else{
+			selectedOps.push(symObj);
+			btn.setAttribute('active', 'true');
+		}
+		
 		btn.addEventListener('click', (e) =>{
 			if(!inTest){
 				if(btn.getAttribute('active') == 'true'){
 					btn.setAttribute('active', 'false');
-					removeFromArray(selectedOps, symbol);
+					removeFromArray(selectedOps, symObj);
 				}
 				else{
 					btn.setAttribute('active', 'true');
-					selectedOps.push(symbol);
+					selectedOps.push(symObj);
 				}
 			}
 			else{
@@ -110,7 +127,7 @@ function setUpTimes(){
 		const answer = get('answer');
 		answer.innerHTML = '';
 		if(answer.value){
-			const userAnswer = parseInt(answer.value);
+			const userAnswer = parseFloat(answer.value);
 			const resultArea = get('result')
 			if(userAnswer === question.answer){
 				correctAnswer();
@@ -145,7 +162,7 @@ function setUpTimes(){
 		resultArea.appendChild(document.createElement('br'));
 		const cor = document.createElement('div');
 		cor.setAttribute('class','correct');
-		cor.innerHTML = question.lhs + ' ' + question.symbol + ' ' + question.rhs + ' = ' + question.answer;
+		cor.innerHTML = question.lhs + ' ' + question.symbol.symbol + ' ' + question.rhs + ' = ' + question.answer;
 		resultArea.appendChild(cor);
 		const press = document.createElement('p');
 		press.innerText = 'Press enter to continue';
@@ -174,7 +191,7 @@ function setUpTimes(){
 				);
 			}
 
-			get('question').innerText = q.lhs + ' ' + q.symbol + ' ' + q.rhs + ' = ';
+			get('question').innerHTML = q.lhs + ' ' + q.symbol.symbol + ' ' + q.rhs + ' = ';
 			get('answer').value = '';
 			get('result').innerHTML = '';
 			nextAction = () => {
@@ -192,19 +209,24 @@ function setUpTimes(){
 	}
 
 	function buildAnswer(question){
-		if(question.symbol === '/'){
-			question.answer = question.lhs;
-			if(question.rhs === 0)
-				question.rhs = 1;
-			question.lhs = question.rhs * question.lhs;
+		if(question.symbol.name === 'div'){
+			question.rhs = Math.max(question.rhs, 1);
+			question.lhs = Math.max(question.lhs, 1);
+			
+			const min = Math.min(question.lhs, question.rhs);
+			const max = Math.max(question.lhs, question.rhs);
+			
+			question.answer = max;
+			question.rhs = min;
+			question.lhs = min * max;
 		}
-		else if (question.symbol === 'x'){
+		else if (question.symbol.name === 'mul'){
 			question.answer = question.rhs * question.lhs;
 		}
-		else if (question.symbol === '+'){
+		else if (question.symbol.name === 'add'){
 			question.answer = question.rhs + question.lhs;
 		}
-		else if (question.symbol === '-'){
+		else if (question.symbol.name === 'sub'){
 			if(question.rhs > question.lhs){
 				const temp = question.lhs;
 				question.lhs = question.rhs;
@@ -247,7 +269,7 @@ function setUpTimes(){
 			const list = document.createElement('ul');
 			for(let i = 0; i < incorrect.length; i++){
 				const li = document.createElement('li');
-				li.innerText = incorrect[i].lhs + ' ' + incorrect[i].symbol + ' ' + incorrect[i].rhs + ' = ' + incorrect[i].answer;
+				li.innerText = incorrect[i].lhs + ' ' + incorrect[i].symbol.symbol + ' ' + incorrect[i].rhs + ' = ' + incorrect[i].answer;
 				list.appendChild(li);
 			}
 			resultArea.appendChild(list);

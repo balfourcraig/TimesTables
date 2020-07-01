@@ -34,6 +34,7 @@ section{
   font-size: 24px;
   font-weight: bold;
   background: none;
+  position: relative;
 }
 
 .timeBtn[active="true"]{
@@ -46,6 +47,17 @@ section{
 	border-color: white;
 }
 
+.timeBtn[active="true"]:hover::before{
+	color: green;
+}
+
+.timeBtn[active="true"]::before{
+	content: '\2713';
+	position: absolute;
+	top: -0.5em;
+	right: -2px;
+}
+
 .timeBtn[active="false"]{
 	color: gray;
 }
@@ -53,6 +65,14 @@ section{
 .timeBtn[active="false"]:hover{
 	color: white;
 	background-color: gray;
+}
+
+.timeBtn[active="false"]::before{
+	content: '\2718';
+	position: absolute;
+	top: -0.5em;
+	right: -2px;
+	color: crimson;
 }
 
 #start{
